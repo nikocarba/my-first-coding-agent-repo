@@ -1,0 +1,15 @@
+# OpenClaw Crontab
+# =================================================================
+# DO NOT use this file directly. Instead, run setup.sh — it will
+# print the exact commands with your repo path already filled in.
+#
+# To install manually:
+#   crontab -e
+#   Paste the two lines below, replacing REPO_ROOT with your path.
+# =================================================================
+
+# Check all running agents every 10 minutes (zero token cost)
+*/10 * * * * REPO_ROOT=/YOUR/REPO/PATH /YOUR/REPO/PATH/.openclaw/check-agents.sh >> /YOUR/REPO/PATH/.openclaw/logs/cron.log 2>&1
+
+# Daily cleanup of finished worktrees and task registry (runs at 2am)
+0 2 * * * REPO_ROOT=/YOUR/REPO/PATH /YOUR/REPO/PATH/.openclaw/cleanup.sh >> /YOUR/REPO/PATH/.openclaw/logs/cleanup.log 2>&1
