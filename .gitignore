@@ -1,0 +1,9 @@
+
+# OpenClaw runtime state (do not commit)
+.openclaw/active-tasks.json
+.openclaw/notifications.jsonl
+.openclaw/.notification-cursor
+.openclaw/logs/
+.openclaw/prompts/
+.openclaw/archive-*.json
+.openclaw/archive-*.jsonl

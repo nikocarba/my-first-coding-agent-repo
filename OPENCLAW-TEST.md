@@ -1,1 +1,0 @@
-OpenClaw smoke test passed
