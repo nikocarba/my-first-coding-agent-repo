@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Surprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating particles background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Pre-click state */
+        .prompt {
+            text-align: center;
+            z-index: 10;
+            transition: all 0.5s ease;
+        }
+
+        .prompt.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        .prompt h2 {
+            color: white;
+            font-size: 2rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .prompt .hint {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-top: 1rem;
+            animation: bounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Celebration state */
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .celebration.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .celebration h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            text-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+            animation: celebrateIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            transform: scale(0);
+        }
+
+        @keyframes celebrateIn {
+            0% { transform: scale(0) rotate(-10deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .celebration .subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 1.5rem;
+            animation: fadeSlideIn 0.6s ease 0.4s forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Confetti */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            top: -20px;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotateZ(0deg) rotateX(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotateZ(720deg) rotateX(360deg);
+                opacity: 0.8;
+            }
+        }
+
+        /* Sparkle effect */
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 1s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes sparkle {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Stars decoration */
+        .star {
+            position: fixed;
+            font-size: 2rem;
+            animation: twinkle 2s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .celebration.active ~ .stars .star {
+            opacity: 1;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
+            50% { transform: scale(1.3) rotate(180deg); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .celebration h1 {
+                font-size: 2.2rem;
+                padding: 0 1rem;
+            }
+            .celebration .subtitle {
+                font-size: 1.1rem;
+            }
+            .prompt h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="prompt" id="prompt">
+        <h2>✨ Something special awaits... ✨</h2>
+        <p class="hint">Click anywhere to reveal</p>
+    </div>
+
+    <div class="celebration" id="celebration">
+        <h1>Congratulations, Carba! 🎉</h1>
+        <p class="subtitle">You're absolutely amazing!</p>
+    </div>
+
+    <div class="stars" id="stars"></div>
+    <div class="confetti-container" id="confetti"></div>
+
+    <script>
+        // Create floating background particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = particle.style.height = (Math.random() * 15 + 5) + 'px';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Create confetti explosion
+        function createConfetti() {
+            const container = document.getElementById('confetti');
+            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43', '#10ac84', '#ee5a24'];
+            const shapes = ['square', 'circle', 'triangle'];
+
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+
+                    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                    if (shape === 'circle') {
+                        confetti.style.borderRadius = '50%';
+                    } else if (shape === 'triangle') {
+                        confetti.style.width = '0';
+                        confetti.style.height = '0';
+                        confetti.style.backgroundColor = 'transparent';
+                        confetti.style.borderLeft = '6px solid transparent';
+                        confetti.style.borderRight = '6px solid transparent';
+                        confetti.style.borderBottom = '12px solid ' + colors[Math.floor(Math.random() * colors.length)];
+                    }
+
+                    container.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 20);
+            }
+        }
+
+        // Create decorative stars
+        function createStars() {
+            const container = document.getElementById('stars');
+            const emojis = ['⭐', '🌟', '✨', '💫'];
+
+            for (let i = 0; i < 12; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                star.style.left = Math.random() * 90 + 5 + '%';
+                star.style.top = Math.random() * 90 + 5 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        // Create sparkle effect at click position
+        function createSparkles(x, y) {
+            for (let i = 0; i < 8; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = x + (Math.random() - 0.5) * 100 + 'px';
+                sparkle.style.top = y + (Math.random() - 0.5) * 100 + 'px';
+                sparkle.style.animationDelay = Math.random() * 0.3 + 's';
+                document.body.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 1000);
+            }
+        }
+
+        // Initialize
+        createParticles();
+        createStars();
+
+        // Click handler
+        let revealed = false;
+        document.body.addEventListener('click', (e) => {
+            createSparkles(e.clientX, e.clientY);
+
+            if (!revealed) {
+                revealed = true;
+                document.getElementById('prompt').classList.add('hidden');
+                document.getElementById('celebration').classList.add('active');
+                createConfetti();
+
+                // Continue confetti periodically
+                setInterval(() => {
+                    if (Math.random() > 0.7) {
+                        for (let i = 0; i < 20; i++) {
+                            setTimeout(() => {
+                                const confetti = document.createElement('div');
+                                confetti.className = 'confetti';
+                                confetti.style.left = Math.random() * 100 + '%';
+                                confetti.style.backgroundColor = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'][Math.floor(Math.random() * 5)];
+                                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                                document.getElementById('confetti').appendChild(confetti);
+                                setTimeout(() => confetti.remove(), 4000);
+                            }, i * 50);
+                        }
+                    }
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
