@@ -57,6 +57,9 @@ if [[ -n "$MISSING" ]]; then
   exit 1
 fi
 
+# ── Check for duplicate task ID ───────────────────────────────
+REGISTRY="$REPO_ROOT/.openclaw/active-tasks.json"
+
 # ── Enforce single-agent limit ────────────────────────────────
 RUNNING_COUNT=$(jq '[.[] | select(.status == "running")] | length' "$REGISTRY")
 if [[ "$RUNNING_COUNT" -gt 0 ]]; then
@@ -65,9 +68,6 @@ if [[ "$RUNNING_COUNT" -gt 0 ]]; then
     '{"success": false, "error": ("An agent is already running: " + $id + ". JARVIS must wait for it to finish before spawning a new one.")}'
   exit 1
 fi
-
-# ── Check for duplicate task ID ───────────────────────────────
-REGISTRY="$REPO_ROOT/.openclaw/active-tasks.json"
 EXISTING_STATUS=$(jq -r --arg id "$TASK_ID" \
   '.[] | select(.id == $id) | .status' "$REGISTRY" 2>/dev/null || true)
 

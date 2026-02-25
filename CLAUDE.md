@@ -1,4 +1,4 @@
-# AGENTS.md
+# CLAUDE.md
 # Instructions for Claude Code Agents
 #
 # This file is loaded into every Claude Code agent's context window.
@@ -32,7 +32,7 @@ Do not stop until every box above is checked.
 
 ```bash
 # 1. Orient yourself
-cat AGENTS.md                     # you are reading this
+cat CLAUDE.md                     # you are reading this
 ls src/types/                     # understand the type system first
 grep -r "TODO\|FIXME" src/ --include="*.ts" | head -20  # any relevant hints
 
@@ -89,7 +89,7 @@ Write your question to this file — JARVIS monitors it:
 echo "QUESTION: <your specific question here>" > .openclaw/agent-question.txt
 ```
 
-JARVIS will read this during her monitoring loop and send you an answer
+JARVIS will read this during his monitoring loop and send you an answer
 directly into this terminal session via tmux. Wait a few minutes.
 
 ---

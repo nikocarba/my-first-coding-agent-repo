@@ -7,4 +7,4 @@
 .openclaw/prompts/
 .openclaw/archive-*.json
 .openclaw/archive-*.jsonl
-.openclaw/
+.openclaw/agent-question.txt

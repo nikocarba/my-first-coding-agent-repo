@@ -15,7 +15,7 @@
 A two-tier agent system:
 - YOU (JARVIS) = orchestrator. You have business context, memory,
   meeting notes, customer info. You spawn tasks and supervise agents.
-- CLAUDE CODE AGENTS = coders. They only know what you tell them.
+- CODE AGENTS = coders. They only know what you tell them.
   They implement, test, and open PRs. They know nothing else.
 
 Communication between you and the agents is FILE-BASED (zero API cost):
@@ -68,7 +68,7 @@ mkdir -p .openclaw/logs .openclaw/prompts jarvis-tools
 # 2. Copy all files from this package into your repo.
 #    If you received this as a folder, copy each file:
 #    - JARVIS-MISSION.md          → REPO_ROOT/JARVIS-MISSION.md
-#    - AGENTS.md                  → REPO_ROOT/AGENTS.md
+#    - CLAUDE.md                  → REPO_ROOT/CLAUDE.md
 #    - .openclaw/spawn-agent.sh   → REPO_ROOT/.openclaw/spawn-agent.sh
 #    - .openclaw/complete-task.sh → REPO_ROOT/.openclaw/complete-task.sh
 #    - .openclaw/check-agents.sh  → REPO_ROOT/.openclaw/check-agents.sh

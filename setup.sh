@@ -85,7 +85,7 @@ REQUIRED_FILES=(
   "jarvis-tools/jarvis-poll-notifications.sh"
   "jarvis-tools/jarvis-redirect-agent.sh"
   "jarvis-tools/JARVIS-SYSTEM-PROMPT.md"
-  "AGENTS.md"
+  "CLAUDE.md"
 )
 
 for f in "${REQUIRED_FILES[@]}"; do
