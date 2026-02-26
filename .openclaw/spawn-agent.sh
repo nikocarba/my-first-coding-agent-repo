@@ -68,7 +68,9 @@ echo "   Worktree: $WORKTREE_PATH"
 if [[ -d "$WORKTREE_PATH" ]]; then
   echo "⚠️  Worktree already exists — reusing: $WORKTREE_PATH"
 else
-  git -C "$REPO_ROOT" worktree add "$WORKTREE_PATH" -b "$BRANCH" origin/main
+  # Detect default branch (main or master)
+DEFAULT_BRANCH=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD)
+git -C "$REPO_ROOT" worktree add "$WORKTREE_PATH" -b "$BRANCH" origin/$DEFAULT_BRANCH
   echo "✅ Worktree created."
 
   # Install dependencies
