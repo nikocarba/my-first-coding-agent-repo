@@ -83,6 +83,17 @@ else
   }) 2>/dev/null || echo "⚠️  No package manager detected — skipping install."
 fi
 
+# ── 1b. Copy CLAUDE.md into the worktree ────────────────────
+# CLAUDE.md lives in this template repo (next to .openclaw/).
+# The target repo's worktree needs it so the agent picks it up.
+TEMPLATE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+if [[ -f "$TEMPLATE_ROOT/CLAUDE.md" ]]; then
+  cp "$TEMPLATE_ROOT/CLAUDE.md" "$WORKTREE_PATH/CLAUDE.md"
+  echo "✅ CLAUDE.md copied into worktree."
+else
+  echo "⚠️  CLAUDE.md not found in $TEMPLATE_ROOT — agent will have no instructions."
+fi
+
 # ── 2. Write a launch script for the agent ────────────────────
 # IMPORTANT: We write the prompt to a file and source it from a
 # launch script. This avoids ALL shell-quoting fragility for

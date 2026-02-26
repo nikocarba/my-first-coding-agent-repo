@@ -164,6 +164,25 @@ who is smart but knows nothing about your customers or codebase conventions.
 
 ---
 
+## Deploying Agents on a Target Repo
+
+**All agents run on a separate target repo — NEVER on this template repo.**
+This repo is your toolbox. The target repo is the codebase agents write code in.
+
+`REPO_ROOT` (set above) must point to the target repo. When you spawn a task,
+`spawn-agent.sh` automatically:
+
+1. Creates a git worktree from `origin/main` of the target repo
+2. Copies `CLAUDE.md` from this template repo into the worktree
+
+This means agents always get the latest `CLAUDE.md` instructions, even though
+the file lives here — not in the target repo. No manual copy step is needed.
+
+**If you update `CLAUDE.md`** in this template repo, the next agent you spawn
+will automatically pick up the changes.
+
+---
+
 ## Repo File Map
 
 ```
