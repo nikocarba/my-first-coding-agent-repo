@@ -23,6 +23,7 @@ REPO_ROOT="${REPO_ROOT:-$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)}"
 
 # ── Config (override via env vars if needed) ──────────────────
 WORKTREES_DIR="${WORKTREES_DIR:-$HOME/worktrees}"
+USE_WORKTREE="${USE_WORKTREE:-true}"  # Set to "false" to work directly in REPO_ROOT
 REGISTRY="$REPO_ROOT/.openclaw/active-tasks.json"
 PROMPTS_DIR="$REPO_ROOT/.openclaw/prompts"
 LOG_DIR="$REPO_ROOT/.openclaw/logs"
@@ -64,36 +65,36 @@ echo "   Branch:  $BRANCH"
 echo "   Model:   $CLAUDE_MODEL"
 echo "   Worktree: $WORKTREE_PATH"
 
-# ── 1. Create git worktree (isolated branch) ──────────────────
-if [[ -d "$WORKTREE_PATH" ]]; then
-  echo "⚠️  Worktree already exists — reusing: $WORKTREE_PATH"
+# ── 1. Setup: worktree or direct ───────────────────────────────
+if [[ "$USE_WORKTREE" == "false" ]]; then
+  # Work directly in REPO_ROOT (no worktree)
+  AGENT_PATH="$REPO_ROOT"
+  echo "🚀 Spawning agent: $TASK_ID"
+  echo "   Branch:  $BRANCH (working directly in REPO_ROOT)"
+  echo "   Model:   $CLAUDE_MODEL"
+  echo "   Path:    $REPO_ROOT"
 else
-  # Detect default branch (main or master)
-DEFAULT_BRANCH=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD)
-git -C "$REPO_ROOT" worktree add "$WORKTREE_PATH" -b "$BRANCH" origin/$DEFAULT_BRANCH
-  echo "✅ Worktree created."
-
-  # Install dependencies
-  (cd "$WORKTREE_PATH" && {
-    if [[ -f "pnpm-lock.yaml" ]]; then
-      pnpm install --frozen-lockfile
-    elif [[ -f "package-lock.json" ]]; then
-      npm ci
-    elif [[ -f "package.json" ]]; then
-      npm install
-    fi
-  }) 2>/dev/null || echo "⚠️  No package manager detected — skipping install."
+  # Create git worktree (isolated branch)
+  AGENT_PATH="$WORKTREE_PATH"
+  if [[ -d "$WORKTREE_PATH" ]]; then
+    echo "⚠️  Worktree already exists — reusing: $WORKTREE_PATH"
+  else
+    # Detect default branch (main or master)
+    DEFAULT_BRANCH=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD)
+    git -C "$REPO_ROOT" worktree add "$WORKTREE_PATH" -b "$BRANCH" origin/$DEFAULT_BRANCH
+    echo "✅ Worktree created."
+  fi
 fi
 
-# ── 1b. Copy CLAUDE.md into the worktree ────────────────────
-# CLAUDE.md lives in this template repo (next to .openclaw/).
-# The target repo's worktree needs it so the agent picks it up.
-TEMPLATE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-if [[ -f "$TEMPLATE_ROOT/CLAUDE.md" ]]; then
-  cp "$TEMPLATE_ROOT/CLAUDE.md" "$WORKTREE_PATH/CLAUDE.md"
-  echo "✅ CLAUDE.md copied into worktree."
-else
-  echo "⚠️  CLAUDE.md not found in $TEMPLATE_ROOT — agent will have no instructions."
+# ── 1b. Copy CLAUDE.md into agent path ────────────────────────
+if [[ "$USE_WORKTREE" == "true" ]]; then
+  TEMPLATE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+  if [[ -f "$TEMPLATE_ROOT/CLAUDE.md" ]]; then
+    cp "$TEMPLATE_ROOT/CLAUDE.md" "$WORKTREE_PATH/CLAUDE.md"
+    echo "✅ CLAUDE.md copied into worktree."
+  else
+    echo "⚠️  CLAUDE.md not found in $TEMPLATE_ROOT — agent will have no instructions."
+  fi
 fi
 
 # ── 2. Write a launch script for the agent ────────────────────
@@ -104,7 +105,7 @@ LAUNCH_SCRIPT="$PROMPTS_DIR/$TASK_ID-launch.sh"
 cat > "$LAUNCH_SCRIPT" << LAUNCH
 #!/usr/bin/env bash
 set -euo pipefail
-cd "$WORKTREE_PATH"
+cd "$AGENT_PATH"
 PROMPT=\$(cat "$SAVED_PROMPT")
 claude --model "$CLAUDE_MODEL" \\
   --dangerously-skip-permissions \\
@@ -121,7 +122,7 @@ TASK_JSON=$(jq -n \
   --arg session     "$TMUX_SESSION" \
   --arg branch      "$BRANCH" \
   --arg desc        "$DESCRIPTION" \
-  --arg worktree    "$WORKTREE_PATH" \
+  --arg agentPath   "$AGENT_PATH" \
   --arg prompt_file "$SAVED_PROMPT" \
   --argjson started "$STARTED_AT" \
   --argjson retries 0 \
@@ -130,7 +131,7 @@ TASK_JSON=$(jq -n \
     tmuxSession:    $session,
     branch:         $branch,
     description:    $desc,
-    worktree:       $worktree,
+    agentPath:      $agentPath,
     promptFile:     $prompt_file,
     startedAt:      $started,
     status:         "running",
@@ -158,7 +159,7 @@ echo "📝 Task registered in registry."
 # Kill any stale session with the same name first
 tmux kill-session -t "$TMUX_SESSION" 2>/dev/null || true
 
-tmux new-session -d -s "$TMUX_SESSION" -c "$WORKTREE_PATH" "bash $LAUNCH_SCRIPT"
+tmux new-session -d -s "$TMUX_SESSION" -c "$AGENT_PATH" "bash $LAUNCH_SCRIPT"
 
 # ── 5. Confirm session is alive ───────────────────────────────
 sleep 1
@@ -173,6 +174,7 @@ echo ""
 echo "═══════════════════════════════════════════"
 echo "  Task ID:       $TASK_ID"
 echo "  tmux session:  $TMUX_SESSION"
+echo "  Agent path:    $AGENT_PATH"
 echo "  Log:           $LOG_FILE"
 echo "  Monitor:       tmux attach -t $TMUX_SESSION"
 echo "  Redirect:      tmux send-keys -t $TMUX_SESSION 'your message' Enter"
